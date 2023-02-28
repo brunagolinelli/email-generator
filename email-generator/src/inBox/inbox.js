@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, {useEffect} from 'react';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -19,6 +19,7 @@ import InboxIcon from '@mui/icons-material/MoveToInbox';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { CardInbox } from './style';
+import { checkEmails } from '../urls/url';
 
 
 
@@ -41,6 +42,21 @@ export default function InboxArea() {
     const handleClose = () => {
       setDialog(false);
     };
+
+    // useEffect(()=>{
+    //     checkEmails().then((res)=> {
+    //     if (res.session.mails.length < 1) {
+    //       console.log("Nenhum email ate o momento 😢")
+    //   } else {
+    //       console.log("Chegou email", JSON.stringify(res.session.mails))
+    //   }})
+        
+    // })
+
+    // setInterval(async () => {
+    //   await checkEmails();
+    // }, 10000)
+    
 
   return (
     <CardInbox>

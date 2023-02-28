@@ -2,11 +2,11 @@ import { request, gql } from 'graphql-request'
 
 
 let tempMailObject = {};
-const token = 'brunagolinelli'
+const token = localStorage.getItem('web-test-20230228rbwNf')
 const endpoint = 'https://dropmail.me/api/graphql/' + token
 
-async function checkEmails () {
-    if (tempMailObject.id) {
+export async function checkEmails () {
+  
         const consultMailQuery = gql`
         query {
             session(id: "${tempMailObject.id}") {
@@ -20,22 +20,15 @@ async function checkEmails () {
                 }
             }
         }`
-        try {
         const data = await request(endpoint, consultMailQuery);
-        if (data.session.mails.length < 1) {
-            console.log("Nenhum email ate o momento 😢")
-        } else {
-            console.log("Chegou email", JSON.stringify(data.session.mails))
-        }
-        } catch (error) {
-            console.log("error", error)
-        }
-    } else {
-        return;
-    }
+        return data
+    //     if (tempMailObject.id) {
+    // } else {
+    //     return
+    // }
 }
 
-async function main() {
+ export async function main() {
   const createSessionMutation = gql`
   mutation {
     introduceSession {
@@ -47,17 +40,17 @@ async function main() {
     }
   `
 
-  const data = await request(endpoint, createSessionMutation)
+   const data = await request(endpoint, createSessionMutation)
 
-  console.log(data);
-
-  console.log("Email temporario criado!!!", data.introduceSession.addresses[0].address);
-  tempMailObject = data.introduceSession;
-
-  setInterval(async () => {
-    await checkEmails();
-  }, 10000)
+   return {
+    props:{data}
 }
 
+//   console.log("Email temporario criado!!!", data.introduceSession.addresses[0].address);
+//   tempMailObject = data.introduceSession;
 
-main().catch((error) => console.error(error))
+//   setInterval(async () => {
+//     await checkEmails();
+//   }, 10000)
+}
+
