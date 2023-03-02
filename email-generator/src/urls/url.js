@@ -1,15 +1,16 @@
-import { request, gql } from 'graphql-request'
+import { gql, GraphQLClient } from "graphql-request";
 
+const token = "web-test-20230301NjCxU";
+const proxy = "https://proxy.cors.sh/";
+const endpoint = proxy + "https://dropmail.me/api/graphql/" + token;
 
-let tempMailObject = {};
-const token = 'brunagolinelli'
-const endpoint = 'https://dropmail.me/api/graphql/' + token
+const client = new GraphQLClient(endpoint);
+client.setHeader("x-cors-api-key", "temp_5c42e9389d62c226ce7126926a5321d8");
 
-async function checkEmails () {
-    if (tempMailObject.id) {
-        const consultMailQuery = gql`
+export async function checkEmails(sessionId) {
+  const consultMailQuery = gql`
         query {
-            session(id: "${tempMailObject.id}") {
+            session(id: "${sessionId}") {
                 mails{
                     rawSize,
                     fromAddr,
@@ -19,45 +20,24 @@ async function checkEmails () {
                     headerSubject
                 }
             }
-        }`
-        try {
-        const data = await request(endpoint, consultMailQuery);
-        if (data.session.mails.length < 1) {
-            console.log("Nenhum email ate o momento 😢")
-        } else {
-            console.log("Chegou email", JSON.stringify(data.session.mails))
-        }
-        } catch (error) {
-            console.log("error", error)
-        }
-    } else {
-        return;
-    }
+        }`;
+  const data = await client.request(consultMailQuery);
+  return data;
 }
 
-async function main() {
+export async function createEmailSession() {
   const createSessionMutation = gql`
-  mutation {
-    introduceSession {
-        id,
+    mutation {
+      introduceSession {
+        id
         addresses {
           address
         }
-        }
+        expiresAt
+      }
     }
-  `
+  `;
 
-  const data = await request(endpoint, createSessionMutation)
-
-  console.log(data);
-
-  console.log("Email temporario criado!!!", data.introduceSession.addresses[0].address);
-  tempMailObject = data.introduceSession;
-
-  setInterval(async () => {
-    await checkEmails();
-  }, 10000)
+  const data = await client.request(createSessionMutation);
+  return data;
 }
-
-
-main().catch((error) => console.error(error))
