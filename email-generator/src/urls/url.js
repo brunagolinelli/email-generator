@@ -1,15 +1,16 @@
-import { request, gql } from 'graphql-request'
+import { gql, GraphQLClient } from "graphql-request";
 
+const token = "web-test-20230301NjCxU";
+const proxy = "https://proxy.cors.sh/";
+const endpoint = proxy + "https://dropmail.me/api/graphql/" + token;
 
-let tempMailObject = {};
-const token = localStorage.getItem('web-test-20230228rbwNf')
-const endpoint = 'https://dropmail.me/api/graphql/' + token
+const client = new GraphQLClient(endpoint);
+client.setHeader("x-cors-api-key", "temp_5c42e9389d62c226ce7126926a5321d8");
 
-export async function checkEmails () {
-  
-        const consultMailQuery = gql`
+export async function checkEmails(sessionId) {
+  const consultMailQuery = gql`
         query {
-            session(id: "${tempMailObject.id}") {
+            session(id: "${sessionId}") {
                 mails{
                     rawSize,
                     fromAddr,
@@ -19,38 +20,24 @@ export async function checkEmails () {
                     headerSubject
                 }
             }
-        }`
-        const data = await request(endpoint, consultMailQuery);
-        return data
-    //     if (tempMailObject.id) {
-    // } else {
-    //     return
-    // }
+        }`;
+  const data = await client.request(consultMailQuery);
+  return data;
 }
 
- export async function main() {
+export async function createEmailSession() {
   const createSessionMutation = gql`
-  mutation {
-    introduceSession {
-        id,
+    mutation {
+      introduceSession {
+        id
         addresses {
           address
         }
-        }
+        expiresAt
+      }
     }
-  `
+  `;
 
-   const data = await request(endpoint, createSessionMutation)
-
-   return {
-    props:{data}
+  const data = await client.request(createSessionMutation);
+  return data;
 }
-
-//   console.log("Email temporario criado!!!", data.introduceSession.addresses[0].address);
-//   tempMailObject = data.introduceSession;
-
-//   setInterval(async () => {
-//     await checkEmails();
-//   }, 10000)
-}
-
